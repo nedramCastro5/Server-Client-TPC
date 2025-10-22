@@ -78,7 +78,7 @@ public class TelaClient extends JFrame {
             try {
             	
                 //soc = new Socket("localhost", 9806);
-            	soc = new Socket("192.168.0.10", 9806);
+            	soc = new Socket("192.168.122.184", 9806);
                 isConnected = true;
                 BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 

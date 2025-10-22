@@ -70,8 +70,8 @@ public class Server extends JFrame {
             if (soc != null && !soc.isClosed()) {
                 try {
                     PrintWriter pw = new PrintWriter(soc.getOutputStream(), true);
-                    pw.println("<Servidor>: " + msg);
-                    ta.append("<Servidor>: " + msg + "\n");
+                    pw.println("<Servidor>: " + msg +" "+ dt +"\n");
+                    ta.append("<Servidor>: " + msg +" "+ dt +"\n");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -101,7 +101,7 @@ public class Server extends JFrame {
             }).start();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Connexao perdida");
         }
     }
 
