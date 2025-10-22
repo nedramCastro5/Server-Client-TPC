@@ -7,60 +7,58 @@ import java.awt.event.FocusListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Tela extends JFrame /*implements FocusListener*/{
+public class Tela extends JFrame{
 	
-	private JButton bt1;
-	private JTextField nome, ip;
-	private JPanel panel1, panel2;
-	
+	private JButton jb_confirm, jb_reset;
+	private JTextField jtf_nome;
+	private JLabel jl_nome;
+	private JPanel jp_user, jp_buttons;
+
 	public Tela() {
 		instanciar();
 		definirLayout();
 		propriedadesTela();
 		adicionarElementos();
 		darAccao();
-		//darFocus();
 		this.setVisible(true);
 	}
 	
-	/*private void darFocus() {
-		nome.addFocusListener(this);
-	}*/
-	
-	
 	
 	private void darAccao() {
-		bt1.addActionListener((e)->{
-			if((nome.getText()!=null && !(nome.getText().equals("Nome:")))
-					&& (ip.getText()!=null && !(ip.getText().equals("IP:")))) {
-				this.dispose();
-				new TelaClient();
-				return;
-			}
+		jb_confirm.addActionListener((e)->{
+			UserName userName = new UserName();
 			
-			JOptionPane.showMessageDialog(this, "Preencha todos os campos");
+			userName.saveName(jtf_nome.getText());
+			this.dispose();
+			new TelaClient();
+			return;
 			
+		});
+		
+		jb_reset.addActionListener((e)->{
+			jtf_nome.setText("");
 		});
 	}
 
 	private void instanciar() {
-		bt1 = new JButton("Confirmar");
-		nome = new JTextField("Nome:", 15);
-		ip = new JTextField("IP:", 15);
-		panel1 = new JPanel();
-		panel2 = new JPanel();
+		jb_confirm = new JButton("Confirmar");
+		jb_reset = new JButton("Reset");
+		jtf_nome = new JTextField(17);
+		jp_user = new JPanel();
+		jp_buttons = new JPanel();
+		jl_nome = new JLabel("UserName:");
 		
 	}
 
 	private void definirLayout() {
-		FlowLayout flow = new FlowLayout(FlowLayout.LEFT, 20, 10);
 		BorderLayout border = new BorderLayout();
-		panel1.setLayout(flow);
-		panel2.setLayout(flow);
+		jp_user.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 10));
+		jp_buttons.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10));
 		this.setLayout(border);
 		
 	}
@@ -73,48 +71,16 @@ public class Tela extends JFrame /*implements FocusListener*/{
 	}
 
 	private void adicionarElementos() {
-		panel1.add(nome);
-		panel2.add(ip);
-		panel2.add(bt1);
+		jp_user.add(jl_nome);
+		jp_user.add(jtf_nome);
 		
 		
-		this.add(panel1, BorderLayout.NORTH);
-		this.add(panel2, BorderLayout.SOUTH);
+		jp_buttons.add(jb_reset);
+		jp_buttons.add(jb_confirm);
+		
+		
+		this.add(jp_user, BorderLayout.NORTH);
+		this.add(jp_buttons, BorderLayout.SOUTH);
 	}
-
-	
-	
-	///Erro no PlaceHolder Do IP
-	//////////<------------------------------------------>////////////
-	/*@Override
-	public void focusGained(FocusEvent e) {
-		if(e.getSource() == nome) {
-			if(nome.getText().equals("Nome:")) {
-				nome.setText("");
-			}
-		}
-		
-		if(e.getSource() == ip) {
-			if(ip.getText().equals("IP:")) {
-				ip.setText("");
-			}
-		}
-	}
-
-	@Override
-	public void focusLost(FocusEvent e) {
-		if(e.getSource()==nome) {
-			if(!(nome.getText().equals("Nome:"))) {
-				nome.setText("Nome:");
-			}
-		}
-		
-		if(e.getSource()==ip) {
-			if(!(ip.getText().equals("IP:"))) {
-				ip.setText("IP:");
-			}
-		}
-	}*/
-	//////////<------------------------------------------>////////////
 
 }

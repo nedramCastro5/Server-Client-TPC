@@ -1,133 +1,95 @@
 package ti;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
+import java.awt.*;
+import java.io.*;
 import java.net.Socket;
 import java.util.Date;
+import javax.swing.*;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
+public class TelaClient extends JFrame {
 
+    private JTextArea ta;
+    private JTextField jtf_mensagem;
+    private JButton enviar;
+    private JPanel panel, jp_botao_e_campo_mensagem, jp_botao;
+    private Socket soc;
+    private boolean isConnected = false;
+    private Date dt;
 
-///o trabalho so connecta ao servidor
-///amanha vamos colocar mais um cliente ao server
-///e vao trocar mensagens com o outro cliente
-public class TelaClient extends JFrame{
-	
-	private JTextArea ta;
-	private JButton enviar;
-	private JPanel panel;
-	private JLabel label;
-	private Thread t;
-	private Date dt;
-	private boolean isConnected = false;
-	
-	private Socket soc;
-	
-	public TelaClient() {
-		instanciar();
-		definirLayout();
-		propriedadesTela();
-		adicionarElementos();
-		darAccao();
-		this.setVisible(true);
-	}
-	
-	
+    public TelaClient() {
+        instanciar();
+        definirLayout();
+        propriedadesTela();
+        adicionarElementos();
+        darAccao();
+        this.setVisible(true);
+        connectar();
+    }
 
-	private void darAccao() {
-		enviar.addActionListener((e)->{
-			ta.getText();
-		});
-	}
+    private void instanciar() {
+        ta = new JTextArea(20, 32);
+        enviar = new JButton("Enviar");
+        panel = new JPanel(new BorderLayout());
+        jtf_mensagem = new JTextField(20);
+        jp_botao_e_campo_mensagem = new JPanel(new FlowLayout());
+        jp_botao = new JPanel(new FlowLayout());
+        dt = new Date();
+    }
 
+    private void definirLayout() {
+        this.setLayout(new BorderLayout());
+    }
 
+    private void propriedadesTela() {
+        this.setSize(400, 400);
+        this.setLocationRelativeTo(null);
+        this.setResizable(false);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
 
-	private void instanciar() {
-		ta = new JTextArea(20, 32);
-		enviar = new JButton("Enviar");
-		panel = new JPanel();
-		label = new JLabel();
-		dt = new Date();
-	}
+    private void adicionarElementos() {
+        jp_botao.add(enviar);
+        jp_botao_e_campo_mensagem.add(jtf_mensagem);
+        jp_botao_e_campo_mensagem.add(jp_botao);
+        this.add(panel, BorderLayout.CENTER);
+        this.add(jp_botao_e_campo_mensagem, BorderLayout.SOUTH);
+        panel.add(new JScrollPane(ta), BorderLayout.CENTER);
+    }
 
-	private void definirLayout() {
-		BorderLayout border = new BorderLayout();
-		panel.setLayout(new CardLayout());
-		this.setLayout(border);
-	}
+    private void darAccao() {
+        enviar.addActionListener(e -> {
+            String msg = jtf_mensagem.getText();
+            String user = new UserName().getUser();
+            if (soc != null && !soc.isClosed()) {
+                try {
+                    PrintWriter pw = new PrintWriter(soc.getOutputStream(), true);
+                    pw.println("<"+ user + ">: " + msg);
+                    ta.append("<"+ user + ">: " + msg + "\n");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            jtf_mensagem.setText("");
+        });
+    }
 
-	private void propriedadesTela() {
-		this.setSize(400,400);
-		this.setLocationRelativeTo(null);
-		this.setResizable(false);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
+    private void connectar() {
+        new Thread(() -> {
+            try {
+            	
+                //soc = new Socket("localhost", 9806);
+            	soc = new Socket("192.168.0.10", 9806);
+                isConnected = true;
+                BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 
-	//adicionei o request do cliente
-	private void adicionarElementos() {
-		
-		panel.add(label ,"loadingLabel");
-		panel.add(ta, "Chat");
-		this.add(panel, BorderLayout.CENTER);
-		this.add(enviar, BorderLayout.SOUTH);
-		
-		
-		try{
-			
-			t = new Thread(()->{
-				CardLayout card = (CardLayout) panel.getLayout();
-				
-					label.setText("Loading the server..., please wait.");
-					card.show(panel ,"loadingLabel");
-					
-					try {
-						soc = new Socket("localhost", 9806);
-						System.out.println("Connected!");
-						isConnected = true;
-						System.out.println(dt);
-					}catch(Exception e) {
-						System.out.println(e.getMessage());
-						JOptionPane.showMessageDialog(this, "Connection refused: connect");
-					}
-					
-					
-					try {
-						Thread.sleep(5000);
-					}catch(InterruptedException ioe) {
-						System.out.println(ioe.getMessage());
-					}
-					
-					
-					String text = null;
-					if(isConnected) {
-						text = "Connected Sucessfully!\n"+dt;
-						ta.setText(text);
-					}else {
-						text = "Connection Refused!";
-						ta.setText(text);
-						this.dispose();
-						new Tela();
-					}
-					
-					card.show(panel, "Chat");
-							
-			});
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(this, "Some Went Wrong while connecting to server");
-			
-			System.out.println("Some Went Wrong while connecting to server");
-		}
-		
-		t.start();
-	}
-	
-	
-	
-	
+                String msg;
+                while ((msg = in.readLine()) != null) {
+                    ta.append(msg + "\n");
+                }
 
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Lost Connection");
+            }
+        }).start();
+    }
 }
